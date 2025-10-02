@@ -18,8 +18,9 @@ RUN mkdir -p /wheels && \
     chown -R builduser:builduser /app /wheels
 USER builduser
 
-# Build wheels with hash checking
-RUN pip wheel --no-cache-dir --no-deps -r requirements.txt -w /wheels
+# Build wheels with all dependencies
+RUN pip download -r requirements.txt -d /wheels && \
+    pip wheel --no-cache-dir --find-links=/wheels -w /wheels -r requirements.txt
 
 # Run stage (non-root)
 FROM python:3.11-slim
@@ -44,7 +45,7 @@ WORKDIR /app
 COPY --from=builder --chown=appuser:appuser /wheels /wheels
 COPY --chown=appuser:appuser app/requirements.txt .
 
-# Install packages with hash verification (recommend adding --require-hashes to requirements.txt)
+# Install packages from pre-built wheels (no external access)
 RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt && \
     rm -rf /wheels
 
