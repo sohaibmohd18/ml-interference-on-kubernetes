@@ -1,0 +1,10 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+scikit-learn==1.5.1
+scipy==1.14.1
+joblib==1.4.2
+threadpoolctl==3.5.0
+numpy==2.1.0
+prometheus-client==0.20.0
+pydantic==2.9.2
+pytest==8.3.2     # if you run tests in the image
