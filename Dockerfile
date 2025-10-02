@@ -1,5 +1,5 @@
 # Build stage - use non-root user
-FROM python:3.11.9-slim@sha256:2ec5a4a5c3e919570f57675471f081d6299668d909feabd8d4803c6c61af666c AS builder
+FROM python:3.11-slim AS builder
 
 # Create non-root user for build stage
 RUN adduser --disabled-password --gecos "" --uid 1000 builduser
@@ -13,15 +13,16 @@ RUN apt-get update && \
 WORKDIR /app
 COPY app/requirements.txt .
 
-# Change ownership and switch to non-root user
-RUN chown -R builduser:builduser /app
+# Create wheels directory and change ownership
+RUN mkdir -p /wheels && \
+    chown -R builduser:builduser /app /wheels
 USER builduser
 
 # Build wheels with hash checking
 RUN pip wheel --no-cache-dir --no-deps -r requirements.txt -w /wheels
 
 # Run stage (non-root)
-FROM python:3.11.9-slim@sha256:2ec5a4a5c3e919570f57675471f081d6299668d909feabd8d4803c6c61af666c
+FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
